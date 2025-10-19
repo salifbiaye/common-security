@@ -2,21 +2,18 @@ package com.crm_bancaire.common.security.gateway;
 
 import com.crm_bancaire.common.security.dto.EndpointRule;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.server.PathContainer;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
