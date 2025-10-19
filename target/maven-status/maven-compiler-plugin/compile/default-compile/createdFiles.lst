@@ -1,0 +1,8 @@
+com\crm_bancaire\common\security\dto\SecurityRules.class
+com\crm_bancaire\common\security\annotation\SecuredEndpoint.class
+com\crm_bancaire\common\security\dto\EndpointRule$EndpointRuleBuilder.class
+com\crm_bancaire\common\security\dto\EndpointRule.class
+com\crm_bancaire\common\security\annotation\PublicEndpoint.class
+com\crm_bancaire\common\security\enums\Role.class
+com\crm_bancaire\common\security\dto\SecurityRules$SecurityRulesBuilder.class
+com\crm_bancaire\common\security\scanner\SecurityRulesScanner.class
