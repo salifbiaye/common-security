@@ -7,6 +7,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
@@ -57,55 +58,50 @@ public class DynamicSecurityLoader {
         List<String> services = discoveryClient.getServices();
         log.info("📋 Found services: {}", services);
 
-        for (String serviceName : services) {
-            // Skip gateway et registry
-            if (serviceName.equalsIgnoreCase("gateway") ||
-                serviceName.equalsIgnoreCase("sib-gateway-service") ||
-                serviceName.equalsIgnoreCase("sib-registry")) {
-                log.debug("⏭️ Skipping service: {}", serviceName);
-                continue;
-            }
-
-            log.info("🔄 Attempting to load rules from service: {}", serviceName);
-
-            try {
+        // Build a reactive pipeline: for each service, call /security/rules and update the map.
+        Flux.fromIterable(services)
+            .filter(serviceName -> {
+                if (serviceName.equalsIgnoreCase("gateway") ||
+                    serviceName.equalsIgnoreCase("sib-gateway-service") ||
+                    serviceName.equalsIgnoreCase("sib-registry")) {
+                    log.debug("⏭️ Skipping service: {}", serviceName);
+                    return false;
+                }
+                return true;
+            })
+            .doOnNext(serviceName -> log.info("🔄 Attempting to load rules from service: {}", serviceName))
+            .flatMap(serviceName -> {
                 String uri = "lb://" + serviceName + "/security/rules";
                 log.debug("   → Calling URI: {}", uri);
 
-                // 2. Appelle /security/rules via LoadBalancer (lb://)
-                SecurityRules rules = webClientBuilder.build()
+                return webClientBuilder.build()
                     .get()
                     .uri(uri)
                     .retrieve()
                     .bodyToMono(SecurityRules.class)
                     .timeout(Duration.ofSeconds(5))
+                    .doOnNext(rules -> {
+                        if (rules != null && rules.getEndpoints() != null) {
+                            securityRules.put(serviceName, rules.getEndpoints());
+                            log.info("✅ Loaded {} security rules from {}",
+                                     rules.getEndpoints().size(), serviceName);
+
+                            rules.getEndpoints().forEach(rule ->
+                                log.debug("   → {} {} = roles: {}, public: {}",
+                                          rule.getMethods(), rule.getFullPath(),
+                                          rule.getRoles(), rule.isPublic())
+                            );
+                        }
+                    })
                     .onErrorResume(e -> {
                         log.warn("⚠️ Could not load security rules from {}: {} ({})",
                                  serviceName, e.getMessage(), e.getClass().getSimpleName());
                         return Mono.empty();
-                    })
-                    .block();
-
-                if (rules != null && rules.getEndpoints() != null) {
-                    securityRules.put(serviceName, rules.getEndpoints());
-                    log.info("✅ Loaded {} security rules from {}",
-                             rules.getEndpoints().size(), serviceName);
-
-                    // Log des règles chargées (debug)
-                    rules.getEndpoints().forEach(rule ->
-                        log.debug("   → {} {} = roles: {}, public: {}",
-                                  rule.getMethods(), rule.getFullPath(),
-                                  rule.getRoles(), rule.isPublic())
-                    );
-                }
-
-            } catch (Exception e) {
-                log.error("❌ Error loading security rules from {}: {}",
-                          serviceName, e.getMessage());
-            }
-        }
-
-        log.info("🎯 Security rules loading completed. Total services: {}", securityRules.size());
+                    });
+            }, 8) // concurrency 8
+            .collectList()
+            .doOnSuccess(list -> log.info("🎯 Security rules loading completed. Total services: {}", securityRules.size()))
+            .subscribe();
     }
 
     /**
