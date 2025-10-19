@@ -7,4 +7,6 @@ C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\gateway\DynamicSecurityLoader.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\gateway\EnableDynamicSecurity.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\gateway\SecurityRulesController.java
+C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\metadata\SecurityMetadataAutoConfiguration.java
+C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\metadata\SecurityMetadataController.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\scanner\SecurityRulesScanner.java

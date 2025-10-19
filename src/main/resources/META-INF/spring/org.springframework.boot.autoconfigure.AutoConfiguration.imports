@@ -1,0 +1,3 @@
+com.crm_bancaire.common.security.gateway.DynamicSecurityAutoConfiguration
+com.crm_bancaire.common.security.metadata.SecurityMetadataAutoConfiguration
+
