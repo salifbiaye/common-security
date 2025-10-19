@@ -24,10 +24,17 @@
     </properties>
 
     <dependencies>
-        <!-- Spring Web for annotations -->
+        <!-- Spring Context for @Component, @Configuration -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!-- Spring Web annotations (provided - not transitive) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Lombok -->
