@@ -1,8 +1,10 @@
 com\crm_bancaire\common\security\dto\SecurityRules.class
 com\crm_bancaire\common\security\metadata\SecurityMetadataController.class
 com\crm_bancaire\common\security\annotation\SecuredEndpoint.class
+com\crm_bancaire\common\security\autoconfigure\CommonSecurityAutoConfiguration.class
 com\crm_bancaire\common\security\annotation\PublicEndpoint.class
 com\crm_bancaire\common\security\gateway\DynamicSecurityLoader.class
+com\crm_bancaire\common\security\gateway\DiscoveryEventListener.class
 com\crm_bancaire\common\security\gateway\EnableDynamicSecurity.class
 com\crm_bancaire\common\security\gateway\DynamicSecurityAutoConfiguration.class
 com\crm_bancaire\common\security\dto\SecurityRules$SecurityRulesBuilder.class

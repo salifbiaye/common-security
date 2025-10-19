@@ -1,7 +1,9 @@
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\annotation\PublicEndpoint.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\annotation\SecuredEndpoint.java
+C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\autoconfigure\CommonSecurityAutoConfiguration.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\dto\EndpointRule.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\dto\SecurityRules.java
+C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\gateway\DiscoveryEventListener.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\gateway\DynamicAuthorizationManager.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\gateway\DynamicSecurityAutoConfiguration.java
 C:\Users\DELL\Downloads\sib-base\common-security\src\main\java\com\crm_bancaire\common\security\gateway\DynamicSecurityLoader.java
