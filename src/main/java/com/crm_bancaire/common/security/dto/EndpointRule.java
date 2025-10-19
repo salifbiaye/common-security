@@ -44,11 +44,20 @@ public class EndpointRule {
      * Retourne le chemin complet de l'endpoint
      */
     public String getFullPath() {
+        // Si path est vide, retourner basePath sans slash final
+        if (path == null || path.isEmpty()) {
+            return basePath;
+        }
+
+        // Si basePath se termine par / et path commence par /, enlever un /
         if (basePath.endsWith("/") && path.startsWith("/")) {
             return basePath + path.substring(1);
-        } else if (!basePath.endsWith("/") && !path.startsWith("/")) {
+        }
+        // Si aucun des deux n'a de /, ajouter un /
+        else if (!basePath.endsWith("/") && !path.startsWith("/")) {
             return basePath + "/" + path;
         }
+        // Sinon, juste concaténer
         return basePath + path;
     }
 }
