@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.github.salifbiaye</groupId>
             <artifactId>common-security</artifactId>
-            <version>v1.0.0</version>
+            <version>485145b527</version>
         </dependency>
         <!-- Lombok -->
         <dependency>
