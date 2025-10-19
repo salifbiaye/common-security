@@ -10,7 +10,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.PostConstruct;
+import org.springframework.context.event.EventListener;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class SecurityRulesScanner {
         this.applicationContext = applicationContext;
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void scanControllers() {
         log.info("🔍 Scanning controllers for security annotations in service: {}", serviceName);
 

@@ -21,6 +21,7 @@ public class DynamicSecurityAutoConfiguration {
 
     @Bean
     @LoadBalanced
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(org.springframework.web.reactive.function.client.WebClient.Builder.class)
     public WebClient.Builder loadBalancedWebClientBuilder() {
         log.info("🔧 Configuring LoadBalanced WebClient.Builder for dynamic security");
         return WebClient.builder();
