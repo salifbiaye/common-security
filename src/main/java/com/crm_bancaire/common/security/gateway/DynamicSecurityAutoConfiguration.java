@@ -27,7 +27,7 @@ public class DynamicSecurityAutoConfiguration {
         return WebClient.builder();
     }
 
-    @Bean
+    @Bean(name = "dynamicSecurityLoader")
     public DynamicSecurityLoader dynamicSecurityLoader(
             DiscoveryClient discoveryClient,
             WebClient.Builder webClientBuilder) {
