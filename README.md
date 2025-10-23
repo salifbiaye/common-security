@@ -1,10 +1,35 @@
-# Common Security Module
+# 🔐 Common Security
 
-Module partagé pour la gestion automatique de la sécurité des microservices via annotations.
+**Librairie de sécurité réutilisable pour microservices Spring Boot**
 
-## 🚀 Installation via JitPack
+Simplifiez la gestion de la sécurité dans vos microservices avec des annotations et une auto-configuration intelligente.
 
-### 1. Ajouter le repository JitPack dans ton `pom.xml`
+[![](https://jitpack.io/v/salifbiaye/common-security.svg)](https://jitpack.io/#salifbiaye/common-security)
+
+---
+
+## ✨ Fonctionnalités
+
+### Pour les Microservices (Spring MVC)
+
+- ✅ **@SecuredEndpoint** - Sécurisez vos endpoints avec des rôles
+- ✅ **@PublicEndpoint** - Marquez les endpoints publics
+- ✅ **@EnableUserContext** - Accédez facilement à l'utilisateur courant
+- ✅ **UserContext.getCurrentActor()** - Infos JWT partout dans le code
+- ✅ **Support Keycloak** par défaut (extensible)
+
+### Pour le Gateway (Spring Cloud Gateway)
+
+- ✅ **@EnableDynamicSecurity** - Sécurité dynamique avec Eureka
+- ✅ **Découverte automatique** des règles depuis les services
+- ✅ **Zéro duplication** - Chaque service gère ses autorisations
+- ✅ **Rechargement auto** toutes les 5 minutes
+
+---
+
+## 🚀 Quick Start
+
+### Installation
 
 ```xml
 <repositories>
@@ -13,43 +38,20 @@ Module partagé pour la gestion automatique de la sécurité des microservices v
         <url>https://jitpack.io</url>
     </repository>
 </repositories>
-```
 
-### 2. Ajouter la dépendance
-
-```xml
 <dependency>
     <groupId>com.github.salifbiaye</groupId>
     <artifactId>common-security</artifactId>
-    <version>v1.0.0</version>
+    <version>v1.0.13</version>
 </dependency>
 ```
 
-> **Note** : Remplace `v1.0.0` par la version souhaitée (voir les releases sur GitHub)
-
-### 3. Activer le scan des components
-
-Crée une classe de configuration dans ton microservice :
+### Microservice
 
 ```java
-package com.ton_package.config;
-
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@ComponentScan(basePackages = "com.crm_bancaire.common.security")
-public class CommonSecurityConfig {
-}
-```
-
-## 📖 Utilisation
-
-### Sécuriser un endpoint
-
-```java
-import com.crm_bancaire.common.security.annotation.SecuredEndpoint;
-import com.crm_bancaire.common.security.annotation.PublicEndpoint;
+@SpringBootApplication
+@EnableUserContext
+public class UserServiceApplication {}
 
 @RestController
 @RequestMapping("/api/users")
@@ -57,115 +59,31 @@ public class UserController {
 
     @GetMapping
     @SecuredEndpoint(roles = {"ADMIN", "SUPER_ADMIN"})
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/{id}")
-    @SecuredEndpoint(roles = {"ADMIN", "SUPER_ADMIN", "CLIENT"})
-    public UserResponse getUserById(@PathVariable String id) {
-        return userService.getUserById(id);
-    }
-
-    @PostMapping("/register")
-    @PublicEndpoint
-    public String register(@RequestBody UserRequest request) {
-        return userService.register(request);
+    public List<User> getAll() {
+        String email = UserContext.getCurrentActor().getEmail();
+        return userService.findAll();
     }
 }
 ```
 
-### Exposer les règles de sécurité
-
-Crée un controller pour que la Gateway puisse découvrir les règles :
+### Gateway
 
 ```java
-import com.crm_bancaire.common.security.dto.SecurityRules;
-import com.crm_bancaire.common.security.scanner.SecurityRulesScanner;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping("/security")
-public class SecurityMetadataController {
-
-    private final SecurityRulesScanner scanner;
-
-    public SecurityMetadataController(@Lazy SecurityRulesScanner scanner) {
-        this.scanner = scanner;
-    }
-
-    @GetMapping("/rules")
-    public SecurityRules getRules() {
-        return scanner.getSecurityRules();
-    }
-}
+@SpringBootApplication
+@EnableDynamicSecurity
+public class GatewayApplication {}
 ```
 
-## 🎯 Annotations disponibles
+---
 
-| Annotation | Description | Exemple |
-|------------|-------------|---------|
-| `@SecuredEndpoint(roles = {...})` | Sécurise un endpoint avec des rôles spécifiques | `@SecuredEndpoint(roles = {"ADMIN", "CLIENT"})` |
-| `@PublicEndpoint` | Marque un endpoint comme public (pas d'authentification) | `@PublicEndpoint` |
+## 📖 Documentation complète
 
-## 🔧 Avantages
+- **[Guide Microservice](docs/MICROSERVICE_GUIDE.md)** - Tout sur l'utilisation dans un service
+- **[Guide Gateway](docs/GATEWAY_GUIDE.md)** - Configuration du Gateway
+- **[Guide UserContext](docs/USER_CONTEXT_GUIDE.md)** - Utilisation avancée du UserContext
+- **[Référence API](docs/API_REFERENCE.md)** - Toutes les annotations et classes
+- **[Exemples](docs/EXAMPLES.md)** - Code complet pour différents cas
 
-- ✅ **Pas de code de sécurité dans chaque microservice**
-- ✅ **Rôles dynamiques** - Chaque microservice définit ses propres rôles
-- ✅ **Auto-découverte** - La Gateway charge automatiquement les règles via Eureka
-- ✅ **Type-safe** - Utilise des String pour maximum de flexibilité
-- ✅ **Scalable** - Nouveau microservice = juste ajouter les annotations
+---
 
-## 📦 Exemple complet
-
-```java
-@RestController
-@RequestMapping("/api/products")
-public class ProductController {
-
-    @GetMapping
-    @SecuredEndpoint(roles = {"ADMIN", "VENDEUR", "CLIENT"})
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
-    }
-
-    @PostMapping
-    @SecuredEndpoint(roles = {"ADMIN", "VENDEUR"})
-    public Product createProduct(@RequestBody Product product) {
-        return productService.createProduct(product);
-    }
-
-    @DeleteMapping("/{id}")
-    @SecuredEndpoint(roles = {"ADMIN"})
-    public void deleteProduct(@PathVariable String id) {
-        productService.deleteProduct(id);
-    }
-
-    @GetMapping("/public/featured")
-    @PublicEndpoint
-    public List<Product> getFeaturedProducts() {
-        return productService.getFeaturedProducts();
-    }
-}
-```
-
-## 🚀 Versions disponibles
-
-Consulte les [releases](https://github.com/salifbiaye/common-security/releases) pour voir les versions disponibles.
-
-Pour vérifier si JitPack a bien buildé la version : https://jitpack.io/#salifbiaye/common-security
-
-## 📝 Contribuer
-
-1. Fork le projet
-2. Crée une branche (`git checkout -b feature/amazing-feature`)
-3. Commit tes changements (`git commit -m 'Add amazing feature'`)
-4. Push vers la branche (`git push origin feature/amazing-feature`)
-5. Ouvre une Pull Request
-
-## 📄 License
-
-Ce projet est sous licence MIT.
+Made with ❤️ for Spring Boot Microservices
