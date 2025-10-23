@@ -105,6 +105,36 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- ========== MVC/Servlet Dependencies (provided - for UserContext) ========== -->
+
+        <!-- Spring Security OAuth2 Resource Server - pour Jwt -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spring Security OAuth2 José - pour JWT parsing -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spring Web MVC - pour HandlerInterceptor et WebMvcConfigurer -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Jakarta Servlet API - pour HttpServletRequest/Response -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
