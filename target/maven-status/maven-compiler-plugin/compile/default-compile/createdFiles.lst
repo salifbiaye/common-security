@@ -20,6 +20,8 @@ com\crm_bancaire\common\security\context\UserContextAutoConfiguration$1.class
 com\crm_bancaire\common\security\jwt\JwtClaimExtractor.class
 com\crm_bancaire\common\security\context\UserContextAutoConfiguration.class
 com\crm_bancaire\common\security\gateway\EnableDynamicSecurity.class
+com\crm_bancaire\common\security\feign\FeignAutoConfiguration.class
+com\crm_bancaire\common\security\feign\FeignAuthInterceptor.class
 com\crm_bancaire\common\security\context\UserContext$ActorInfo$ActorInfoBuilder.class
 com\crm_bancaire\common\security\gateway\DynamicAuthorizationManager.class
 com\crm_bancaire\common\security\gateway\SecurityRulesController.class

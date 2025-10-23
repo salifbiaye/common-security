@@ -37,6 +37,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- OpenFeign - pour FeignAuthInterceptor (optional) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Jakarta Annotations for @PostConstruct -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
