@@ -2,7 +2,9 @@ package com.crm_bancaire.common.security.context;
 
 import com.crm_bancaire.common.security.interceptor.JwtUserInterceptor;
 import com.crm_bancaire.common.security.jwt.JwtClaimExtractor;
+import com.crm_bancaire.common.security.jwt.KeycloakJwtClaimExtractor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Slf4j
 public class UserContextAutoConfiguration {
+
+    /**
+     * Bean JwtClaimExtractor par défaut (Keycloak).
+     * Si l'utilisateur crée son propre @Component JwtClaimExtractor, celui-ci sera ignoré.
+     */
+    @Bean
+    @ConditionalOnMissingBean(JwtClaimExtractor.class)
+    public JwtClaimExtractor jwtClaimExtractor() {
+        log.info("🔧 Using default KeycloakJwtClaimExtractor");
+        return new KeycloakJwtClaimExtractor();
+    }
 
     @Bean
     public JwtUserInterceptor jwtUserInterceptor(JwtClaimExtractor jwtClaimExtractor) {

@@ -4,9 +4,7 @@ import com.crm_bancaire.common.security.context.UserContext.ActorInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 import java.util.List;
@@ -19,14 +17,11 @@ import java.util.Map;
  * - Claims standards: sub, email, preferred_username, given_name, family_name
  * - Rôles: resource_access.oauth2-pkce.roles[0]
  *
- * Cette implémentation est utilisée par défaut si aucune autre implémentation de
- * {@link JwtClaimExtractor} n'est fournie.
+ * Cette implémentation est automatiquement utilisée par défaut via UserContextAutoConfiguration.
  *
  * Pour utiliser un autre provider d'authentification, créez votre propre @Component
  * qui implémente {@link JwtClaimExtractor} et il remplacera automatiquement celui-ci.
  */
-@Component
-@ConditionalOnMissingBean(JwtClaimExtractor.class)
 @Slf4j
 public class KeycloakJwtClaimExtractor implements JwtClaimExtractor {
 
