@@ -44,6 +44,20 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- WebFlux - pour WebClient (optional) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Reactor Core - pour WebClient (optional) -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Jakarta Annotations for @PostConstruct -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
@@ -96,13 +110,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Spring WebFlux - pour WebClient et reactive -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webflux</artifactId>
             <scope>provided</scope>
         </dependency>
 

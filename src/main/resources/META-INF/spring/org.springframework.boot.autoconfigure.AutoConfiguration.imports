@@ -1,6 +1,9 @@
 com.crm_bancaire.common.security.gateway.DynamicSecurityAutoConfiguration
 com.crm_bancaire.common.security.metadata.SecurityMetadataAutoConfiguration
 com.crm_bancaire.common.security.autoconfigure.CommonSecurityAutoConfiguration
-com.crm_bancaire.common.security.feign.FeignAutoConfiguration
+com.crm_bancaire.common.security.httpclient.feign.FeignAutoConfiguration
+com.crm_bancaire.common.security.httpclient.webclient.WebClientAutoConfiguration
+com.crm_bancaire.common.security.httpclient.resttemplate.RestTemplateAutoConfiguration
+com.crm_bancaire.common.security.httpclient.restclient.RestClientAutoConfiguration
 
 

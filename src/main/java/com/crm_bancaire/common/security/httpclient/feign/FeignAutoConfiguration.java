@@ -1,4 +1,4 @@
-package com.crm_bancaire.common.security.feign;
+package com.crm_bancaire.common.security.httpclient.feign;
 
 import feign.RequestInterceptor;
 import lombok.extern.slf4j.Slf4j;
