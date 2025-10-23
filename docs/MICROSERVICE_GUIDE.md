@@ -4,6 +4,19 @@ Guide complet pour utiliser `common-security` dans un microservice Spring MVC.
 
 ---
 
+## ⚡ Configuration par défaut (à savoir!)
+
+| Configuration | Valeur par défaut | Comment changer |
+|--------------|-------------------|-----------------|
+| **Paths interceptés** | `/api/**` seulement | `@EnableUserContext(pathPatterns = {...})` |
+| **Provider JWT** | Keycloak | Créer un `@Component JwtClaimExtractor` |
+| **Client Keycloak** | `oauth2-pkce` | Créer un `@Component JwtClaimExtractor` |
+| **Rôle par défaut** | `USER` | Dans votre `JwtClaimExtractor` custom |
+
+⚠️ **Si votre client Keycloak n'est PAS `oauth2-pkce`** → Voir [Cas 1: Keycloak avec CLIENT ID différent](#cas-1-keycloak-avec-un-client-id-différent)
+
+---
+
 ## 📋 Table des matières
 
 1. [Installation](#installation)
@@ -64,13 +77,36 @@ public class MyServiceApplication {
 
 **C'est tout!** 🎉 Avec Keycloak, aucune autre configuration n'est nécessaire.
 
-### Configuration optionnelle
+### Configuration des paths interceptés
 
-Si vous voulez intercepter d'autres chemins:
+⚠️ **IMPORTANT**: Par défaut, `@EnableUserContext` intercepte **UNIQUEMENT `/api/**`**
+
+Si vos endpoints utilisent d'autres chemins, vous DEVEZ les spécifier:
 
 ```java
-@EnableUserContext(pathPatterns = {"/api/**", "/internal/**"})
+// ❌ Par défaut - Intercepte SEULEMENT /api/**
+@EnableUserContext
 public class MyServiceApplication {}
+
+// ✅ Custom - Intercepte /api/**, /internal/**, /public/**
+@EnableUserContext(pathPatterns = {"/api/**", "/internal/**", "/public/**"})
+public class MyServiceApplication {}
+
+// ✅ Tout intercepter (déconseillé - overhead sur tous les endpoints)
+@EnableUserContext(pathPatterns = {"/**"})
+public class MyServiceApplication {}
+```
+
+**Exemple concret**:
+
+```java
+// Si vos controllers sont comme ça:
+@RequestMapping("/api/users")       // ✅ Intercepté par défaut
+@RequestMapping("/internal/health") // ❌ PAS intercepté par défaut
+@RequestMapping("/public/stats")    // ❌ PAS intercepté par défaut
+
+// Il faut faire:
+@EnableUserContext(pathPatterns = {"/api/**", "/internal/**", "/public/**"})
 ```
 
 ---
@@ -234,13 +270,56 @@ if (UserContext.getCurrentActor() != null) {
 
 ## Providers JWT personnalisés
 
-### Cas 1: Keycloak avec un autre client
+### 🎯 Quand avez-vous besoin d'un extractor custom?
 
-Si votre client Keycloak n'est pas `oauth2-pkce`, créez un extractor custom:
+**Par défaut**, `common-security` utilise `KeycloakJwtClaimExtractor` qui:
+- ✅ Extrait les claims standards: `sub`, `email`, `preferred_username`, `given_name`, `family_name`
+- ✅ Extrait le rôle depuis: `resource_access.oauth2-pkce.roles[0]`
+
+**Vous avez besoin d'un extractor custom SI**:
+1. ❌ Votre client Keycloak n'est **PAS** nommé `oauth2-pkce`
+2. ❌ Vous utilisez **Auth0, Okta, ou un autre provider OAuth2**
+3. ❌ Vous avez un **JWT complètement custom**
+4. ❌ Les claims sont dans des **champs différents**
+
+### Cas 1: Keycloak avec un CLIENT ID DIFFÉRENT
+
+**Problème**: Votre client Keycloak s'appelle `my-app` au lieu de `oauth2-pkce`.
+
+**JWT Keycloak**:
+```json
+{
+  "sub": "123-456",
+  "email": "john@example.com",
+  "resource_access": {
+    "my-app": {              // ← Votre client s'appelle "my-app"
+      "roles": ["ADMIN"]
+    }
+  }
+}
+```
+
+**Solution**: Créez un extractor qui cible votre client:
 
 ```java
-@Component
-public class CustomKeycloakExtractor implements JwtClaimExtractor {
+package com.example.myservice.config;
+
+import com.crm_bancaire.common.security.context.UserContext.ActorInfo;
+import com.crm_bancaire.common.security.jwt.JwtClaimExtractor;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
+
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+
+@Component  // ← Spring va automatiquement utiliser CELUI-CI au lieu du défaut
+public class MyAppJwtExtractor implements JwtClaimExtractor {
+
+    private static final String MY_CLIENT_NAME = "my-app";  // ← VOTRE client ID
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public ActorInfo extractFromJwt(Jwt jwt) {
@@ -250,29 +329,77 @@ public class CustomKeycloakExtractor implements JwtClaimExtractor {
             .username(jwt.getClaimAsString("preferred_username"))
             .firstName(jwt.getClaimAsString("given_name"))
             .lastName(jwt.getClaimAsString("family_name"))
-            .role(extractRole(jwt, "my-custom-client")) // ← Votre client
+            .role(extractRoleFromKeycloak(jwt))  // ← Extraction avec votre client
             .build();
     }
 
-    private String extractRole(Jwt jwt, String clientName) {
-        Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
-        if (resourceAccess != null) {
-            Map<String, Object> client = (Map) resourceAccess.get(clientName);
-            if (client != null) {
-                List<String> roles = (List) client.get("roles");
-                return roles != null && !roles.isEmpty() ? roles.get(0) : "USER";
+    private String extractRoleFromKeycloak(Jwt jwt) {
+        try {
+            Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+            if (resourceAccess != null) {
+                Map<String, Object> myClient = (Map) resourceAccess.get(MY_CLIENT_NAME);
+                if (myClient != null) {
+                    List<String> roles = (List) myClient.get("roles");
+                    if (roles != null && !roles.isEmpty()) {
+                        return roles.get(0);  // Premier rôle
+                    }
+                }
             }
+        } catch (Exception e) {
+            // Log error
         }
-        return "USER";
+        return "USER";  // Rôle par défaut
     }
 
     @Override
     public ActorInfo extractFromToken(String token) {
-        // Même logique avec parsing manuel du JWT
-        // Voir KeycloakJwtClaimExtractor pour exemple complet
+        try {
+            // Décoder le JWT manuellement (pour les appels Feign)
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return null;
+
+            byte[] decodedBytes = Base64.getUrlDecoder().decode(parts[1]);
+            JsonNode payload = objectMapper.readTree(new String(decodedBytes));
+
+            return ActorInfo.builder()
+                .sub(getClaimAsString(payload, "sub"))
+                .email(getClaimAsString(payload, "email"))
+                .username(getClaimAsString(payload, "preferred_username"))
+                .firstName(getClaimAsString(payload, "given_name"))
+                .lastName(getClaimAsString(payload, "family_name"))
+                .role(extractRoleFromNode(payload))
+                .build();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String extractRoleFromNode(JsonNode payload) {
+        try {
+            JsonNode resourceAccess = payload.get("resource_access");
+            if (resourceAccess != null) {
+                JsonNode myClient = resourceAccess.get(MY_CLIENT_NAME);
+                if (myClient != null) {
+                    JsonNode roles = myClient.get("roles");
+                    if (roles != null && roles.isArray() && roles.size() > 0) {
+                        return roles.get(0).asText();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Log error
+        }
+        return "USER";
+    }
+
+    private String getClaimAsString(JsonNode node, String claim) {
+        JsonNode claimNode = node.get(claim);
+        return claimNode != null ? claimNode.asText() : null;
     }
 }
 ```
+
+**C'est tout!** Spring va automatiquement utiliser `MyAppJwtExtractor` au lieu de `KeycloakJwtClaimExtractor`.
 
 ### Cas 2: Auth0
 
